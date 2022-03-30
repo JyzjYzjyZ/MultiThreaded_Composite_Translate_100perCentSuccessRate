@@ -1,5 +1,6 @@
 import http.client
 import hashlib
+import time
 import urllib.parse
 import random
 import json
@@ -399,29 +400,43 @@ class CompositeTranslate():
         # 其中有道2 谷歌2 和huggingface 输出无法更改为zh
         self.targetLan = 'zh'
         tg = self.Transklate_goodjin5(self.targetLan)
+        def _randomSleep(a,b):
+            time.sleep(random.randint( int(a*10),int(b*10) )/10)
         def deepl(q):
+            _randomSleep(0.7,1.1)
             return ts.deepl(q,to_language=self.targetLan)
         def alibaba(q):
+            _randomSleep(0.3,0.5)
             return ts.alibaba(q,to_language=self.targetLan)
         def baidu_0(q):
+            _randomSleep(0.4,0.6)
             return ts.baidu(q,to_language=self.targetLan)
         def baidu_1(q):
+            _randomSleep(0.3,0.5)
             return  tg.baiduTranslate(q)
         def bing(q):
+            _randomSleep(0.1,0.2)
             return ts.bing(q,to_language=self.targetLan)
         def youdao_0(q):
+            _randomSleep(0.4,0.6)
             return ts.youdao(q,to_language=self.targetLan)
         def youdao_1(q):
+            _randomSleep(0.4,0.6)
             return tg.youdaoTranslate(q)
         def google_0(q):
+            _randomSleep(0.1,0.2)
             return ts.google(q,to_language=self.targetLan)
         def google_1(q):
+            _randomSleep(0.1,0.2)
             return tg.googleTranslate(q)
         def sogou(q):
+            _randomSleep(0.6,0.8)
             return ts.sogou(q,to_language=self.targetLan)
         def tencent(q):
+            _randomSleep(0.7,0.9)
             return ts.tencent(q,to_language=self.targetLan)
         def caiyun(q):
+            _randomSleep(0.5,0.7)
             return ts.caiyun(q,to_language=self.targetLan)
         def yandex(q):
             return ts.yandex(q,to_language=self.targetLan)
