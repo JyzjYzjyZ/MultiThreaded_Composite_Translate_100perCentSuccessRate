@@ -401,9 +401,9 @@ class CompositeTranslate():
         self.targetLan = 'zh'
         tg = self.Transklate_goodjin5(self.targetLan)
         def _randomSleep(a,b):
-            offest = 0.1
-            a+=offest
-            b+=offest
+            offset = 0.1
+            a+=offset
+            b+=offset
             time.sleep(random.randint( int(a*10),int(b*10) )/10)
         def deepl(q):
             _randomSleep(0.7,1.1)
