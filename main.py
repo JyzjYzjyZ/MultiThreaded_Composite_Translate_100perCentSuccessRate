@@ -10,10 +10,11 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer ,MarianTokenizer
 import execjs
 import threading
 import  translators  as  ts
+import warnings
 
-
+# pip install sentencepiece
 class CompositeTranslate():
-    def encode(sentences: list, max_len=4800):
+    def encode(self,sentences: list, max_len=4800):
         '''
         :param sentences: [sentence1,sentence2,...]
         :param max_len: The maximum length after encoding is generally much less than this value
@@ -73,17 +74,23 @@ class CompositeTranslate():
         res = _chagesentences(sentences, max_len)
         return _change_to_list(res)
 
-    def decode(sentences: str):
+    def decode(self,sentences: str):
         '''
         :param sentences:[sentence1+sentence2,sentence3+sentence4+sentence5,...]
         :return: [sentence1,sentence2,...]
         '''
         arr = copy.copy(sentences)
         res = []
-        for i in range(len(arr)):
-            # 最后一个】会分割出一个无效的
-            res = res + arr[i].replace('[', '').split(']')[:-1]
-        return res
+        if type(arr) in [bool,int,float]:arr = str(arr)
+        if type(arr) == str:
+            return arr.replace('[', '').split(']')[:-1]
+        elif type(arr) == list:
+            for i in range(len(arr)):
+                # 最后一个】会分割出一个无效的
+                res = res + arr[i].replace('[', '').split(']')[:-1]
+            return res
+        else:
+            raise TypeError('Unsupported decoding types')
 
     class CompositeTranslate_Multi_threaded():
         exitFlag = 0
@@ -287,7 +294,7 @@ class CompositeTranslate():
             def getTk(self, text):
                 return self.ctx.call("TL", text)
 
-        def __init__(self,toLang='zh'):
+        def __init__(self,model_path,toLang='zh'):
             self._baidu_appid = '20190405000284840'
             self._baidu_secretKey = 'eYK0BQrpLj0tPtPppE32'
             self.fromLang = "auto"
@@ -301,7 +308,7 @@ class CompositeTranslate():
 
             self._google_js = self._Yuguii()
 
-            self._huggingFace_path = r'./models\Helsinki-NLPopus-mt-en-zh'
+            self._huggingFace_path = model_path
             self._huggingFace_model = AutoModelForSeq2SeqLM.from_pretrained(self._huggingFace_path)
             self._huggingFace_tokenizer = MarianTokenizer.from_pretrained(self._huggingFace_path)
             self._huggingFace_num_beams = 4
@@ -399,7 +406,9 @@ class CompositeTranslate():
     def __init__(self):
         # 其中有道2 谷歌2 和huggingface 输出无法更改为zh
         self.targetLan = 'zh'
-        tg = self.Transklate_goodjin5(self.targetLan)
+        self.huggingFace_modelPath = r'./models\Helsinki-NLPopus-mt-en-zh'
+        tg = self.Transklate_goodjin5(toLang=self.targetLan,model_path=self.huggingFace_modelPath)
+
         def _randomSleep(a,b):
             offset = 0.1
             a+=offset
@@ -457,18 +466,23 @@ class CompositeTranslate():
 
 
     def run(self,sentences):
+        sentences = self.encode(sentences)
         for c in self.CompositeTranslate_Multi_threaded(sentences,self.func):
             pass
-        if "[" in c:
-            res = []
-            for x in c:
-                res.append(self.decode(x))
-            return res
-        else:
-            return c
 
 
+        decoded = []
+        # x:str '[4][2][1][1]'
+        for x in c:
+            if '[' in x:
+                decoded = decoded+ self.decode(x)
+            else:
+                decoded = decoded+[x]
+                warnings.warn('maybe something is wrong?')
+        return decoded
 
-c = CompositeTranslate().run(['red','blue','yellow'])
-for i in c:
-    print(i)
+
+if __name__=='__main__':
+    c = CompositeTranslate().run(['red','blue','yellow'])
+    for i in c:
+        print(i)
